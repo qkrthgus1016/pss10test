@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSS-10 지각된 스트레스 자가진단</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background-color: #ffffff !important;
+            }
+            .shadow-xl, .shadow-md, .shadow-lg {
+                box-shadow: none !important;
+            }
+        }
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-sky-100 selection:text-sky-800">
+
+    <!-- Header Navbar -->
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 no-print">
+        <div class="max-w-4xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-2.5 cursor-pointer" onclick="resetToHome()">
+                <div class="w-9 h-9 rounded-xl bg-sky-600 flex items-center justify-center text-white shadow-md">
+                    <i data-lucide="smile" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-lg leading-tight">PSS-10 스트레스 자가진단</h1>
+                    <p class="text-xs text-slate-500">Perceived Stress Scale</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs text-slate-500">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1 text-sky-600"></i> 익명 보장 & 데이터 미저장
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-2xl w-full mx-auto px-4 py-8">
+
+        <!-- 1. INTRO SCREEN -->
+        <section id="screen-intro" class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-slate-100 space-y-8 smooth-transition">
+            <div class="text-center space-y-4">
+                <span class="px-3.5 py-1.5 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold tracking-wide uppercase">지각된 스트레스 척도</span>
+                <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900 leading-tight">
+                    나의 스트레스 상태를 점검하는 시간
+                </h2>
+                <p class="text-slate-600 leading-relaxed max-w-xl mx-auto text-sm md:text-base">
+                    PSS-10(Perceived Stress Scale)은 지난 한 달 동안 당신이 일상생활에서 느낀 스트레스의 주관적 정도를 측정하는 대표적인 검사입니다.
+                </p>
+            </div>
+
+            <!-- Notice Box -->
+            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 space-y-3">
+                <h3 class="font-semibold text-slate-800 text-sm flex items-center">
+                    <i data-lucide="info" class="w-4 h-4 text-sky-600 mr-2"></i> 검사 진행 안내
+                </h3>
+                <ul class="text-xs md:text-sm text-slate-600 space-y-2 list-disc list-inside leading-normal">
+                    <li>총 <strong>10문항</strong>으로 구성되어 있으며 약 1~2분이 소요됩니다.</li>
+                    <li>오늘을 기준으로 <strong>지난 한 달 동안</strong>의 경험을 되돌아보며 솔직하게 답변해 주세요.</li>
+                    <li>정답이 없는 설문이므로 깊이 생각하지 않고 떠오르는 느낌대로 선택해 주세요.</li>
+                    <li>응답 데이터는 저장되지 않고 <strong>브라우저에서만 즉시 계산</strong>됩니다.</li>
+                </ul>
+            </div>
+
+            <!-- Start Button -->
+            <div class="pt-2 text-center">
+                <button onclick="startTest()" class="w-full sm:w-auto px-8 py-4 bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-2xl shadow-lg shadow-sky-600/30 transition transform active:scale-95 flex items-center justify-center mx-auto text-base">
+                    <span>검사 시작하기</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. QUESTIONNAIRE SCREEN -->
+        <section id="screen-quiz" class="hidden bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-slate-100 space-y-6 smooth-transition">
+            <!-- Progress Header -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs md:text-sm font-medium text-slate-500">
+                    <span class="text-sky-700 font-semibold">문항 응답</span>
+                    <span><strong id="current-q-num" class="text-sky-600 text-base">1</strong> / 10</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-sky-500 h-full rounded-full transition-all duration-300" style="width: 10%;"></div>
+                </div>
+            </div>
+
+            <!-- Question Title -->
+            <div class="py-2">
+                <h3 id="question-title" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed">
+                    문항 질문 내용
+                </h3>
+                <p class="text-xs text-slate-500 mt-2">지난 한 달 동안의 느낌이나 생각을 기준으로 선택해 주세요.</p>
+            </div>
+
+            <!-- Options Container -->
+            <div id="options-container" class="space-y-3">
+                <!-- Dynamic Options -->
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                <button id="btn-prev" onclick="prevQuestion()" class="px-5 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-medium text-sm transition flex items-center disabled:opacity-40 disabled:cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> 이전
+                </button>
+                <button id="btn-next" onclick="nextQuestion()" disabled class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl font-medium text-sm transition flex items-center shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+                    <span>다음</span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. RESULT SCREEN -->
+        <section id="screen-result" class="hidden space-y-6 smooth-transition">
+            
+            <!-- High Stress Support Notice Box -->
+            <div id="high-stress-alert" class="hidden bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 shadow-md space-y-3">
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-amber-100 rounded-xl text-amber-700">
+                        <i data-lucide="life-buoy" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-amber-900 text-base">스트레스 관리 상담 안내</h3>
+                        <p class="text-xs md:text-sm text-amber-800 mt-1">
+                            현재 지속적인 고도의 스트레스를 경험하고 계실 수 있습니다. 무리하지 마시고 전문가와의 상담이나 휴식을 권장합니다.
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <a href="tel:1577-0199" class="flex items-center justify-between p-3 bg-white rounded-xl border border-amber-200 hover:bg-amber-100/50 transition">
+                        <div>
+                            <p class="text-xs text-amber-700 font-semibold">정신건강 상담전화 (24시간)</p>
+                            <p class="text-lg font-extrabold text-amber-950">1577-0199</p>
+                        </div>
+                        <i data-lucide="phone-call" class="w-5 h-5 text-amber-700"></i>
+                    </a>
+                    <a href="tel:109" class="flex items-center justify-between p-3 bg-white rounded-xl border border-amber-200 hover:bg-amber-100/50 transition">
+                        <div>
+                            <p class="text-xs text-amber-700 font-semibold">마음건강 자살예방 상담전화</p>
+                            <p class="text-lg font-extrabold text-amber-950">109</p>
+                        </div>
+                        <i data-lucide="phone-call" class="w-5 h-5 text-amber-700"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Result Card -->
+            <div class="bg-white rounded-3xl p-6 md:p-10 shadow-xl border border-slate-100 space-y-8">
+                <div class="text-center space-y-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">자가진단 결과</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">PSS-10 스트레스 진단 결과</h2>
+                    <p class="text-xs text-slate-400" id="result-date"></p>
+                </div>
+
+                <!-- Visual Chart & Score Display -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-slate-50/80 p-6 rounded-2xl border border-slate-100">
+                    <!-- Donut Chart Container -->
+                    <div class="relative flex items-center justify-center max-w-[200px] mx-auto">
+                        <canvas id="gaugeChart" width="200" height="200"></canvas>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span class="text-xs text-slate-500 font-medium">스트레스 점수</span>
+                            <span id="score-text" class="text-3xl font-extrabold text-slate-800">0</span>
+                            <span class="text-xs text-slate-400">/ 40점</span>
+                        </div>
+                    </div>
+
+                    <!-- Severity Level Indicator -->
+                    <div class="space-y-3 text-center md:text-left">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500">지각된 스트레스 수준</span>
+                            <h3 id="severity-title" class="text-2xl font-bold text-sky-700">분석 중...</h3>
+                        </div>
+                        <p id="severity-desc" class="text-sm text-slate-600 leading-relaxed">
+                            결과 설명이 표시됩니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Recommendation & Actionable Advice -->
+                <div class="space-y-4">
+                    <h3 class="font-bold text-slate-800 text-lg flex items-center">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-sky-600 mr-2"></i> 스트레스 관리 솔루션
+                    </h3>
+                    <div id="advice-box" class="bg-sky-50/50 border border-sky-100 rounded-2xl p-5 text-sm text-slate-700 leading-relaxed space-y-2">
+                        <!-- Advice Content -->
+                    </div>
+                </div>
+
+                <!-- PSS-10 Score Category Reference Table -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">PSS-10 점수 기준표</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                        <div id="range-low" class="p-3.5 rounded-xl border text-center space-y-1">
+                            <p class="font-bold text-slate-700">0 ~ 12점</p>
+                            <p class="text-slate-500">낮은 스트레스</p>
+                        </div>
+                        <div id="range-mod" class="p-3.5 rounded-xl border text-center space-y-1">
+                            <p class="font-bold text-slate-700">13 ~ 26점</p>
+                            <p class="text-slate-500">중간 정도 스트레스</p>
+                        </div>
+                        <div id="range-high" class="p-3.5 rounded-xl border text-center space-y-1">
+                            <p class="font-bold text-slate-700">27 ~ 40점</p>
+                            <p class="text-slate-500">높은 스트레스</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-3 justify-center no-print">
+                    <button onclick="window.print()" class="flex-1 min-w-[140px] px-5 py-3 bg-slate-800 hover:bg-slate-900 text-white font-medium rounded-xl text-sm transition flex items-center justify-center shadow-md">
+                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> 결과 인쇄/PDF 저장
+                    </button>
+                    <button onclick="copyShareLink()" class="flex-1 min-w-[140px] px-5 py-3 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-xl text-sm transition flex items-center justify-center shadow-md">
+                        <i data-lucide="share-2" class="w-4 h-4 mr-2"></i> 링크 공유하기
+                    </button>
+                    <button onclick="restartTest()" class="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition flex items-center justify-center">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> 다시 검사하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl text-sm shadow-2xl flex items-center space-x-2 transition-all opacity-0 pointer-events-none translate-y-2">
+                <i data-lucide="check-circle" class="w-4 h-4 text-sky-400"></i>
+                <span id="toast-message">링크가 복사되었습니다.</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 no-print">
+        <div class="max-w-4xl mx-auto px-4 text-center space-y-2">
+            <p class="text-xs text-slate-500">
+                본 자가진단은 주관적으로 느끼는 스트레스의 정도를 측정하기 위한 참고용 척도이며, 의학적 진단을 대신할 수 없습니다.<br>
+                일상생활 수행이 심하게 어려우시다면 전문 상담기관이나 의료진의 도움을 받으시는 것이 좋습니다.
+            </p>
+            <p class="text-xs text-slate-400">© Perceived Stress Scale (PSS-10) Self-Assessment Tool</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data & Application Logic -->
+    <script>
+        // PSS-10 Questions (Standard 10-item Perceived Stress Scale)
+        // Reverse Scored Items: 4, 5, 7, 8 (isReverse = true)
+        // Pure prompts without diagnostic category labels or tags.
+        const pssQuestions = [
+            {
+                id: 1,
+                title: "1. 지난 한 달 동안, 예상치 못한 일 때문에 기분이 상했던 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            },
+            {
+                id: 2,
+                title: "2. 지난 한 달 동안, 인생에서 중요한 일들을 조절할 수 없다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            },
+            {
+                id: 3,
+                title: "3. 지난 한 달 동안, 신경이 예민해지고 스트레스를 받고 있다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            },
+            {
+                id: 4,
+                title: "4. 지난 한 달 동안, 개인적인 문제들을 처리하는 당신의 능력에 대해 자부심을 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: true // 역채점 문항
+            },
+            {
+                id: 5,
+                title: "5. 지난 한 달 동안, 일들이 당신의 뜻대로 진행되고 있다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: true // 역채점 문항
+            },
+            {
+                id: 6,
+                title: "6. 지난 한 달 동안, 해야 할 모든 일들을 다 처리할 수 없다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            },
+            {
+                id: 7,
+                title: "7. 지난 한 달 동안, 일상의 짜증거리를 잘 조절할 수 있었던 적이 얼마나 자주 있었습니까?",
+                isReverse: true // 역채점 문항
+            },
+            {
+                id: 8,
+                title: "8. 지난 한 달 동안, 최고로 좋은 상태에 있다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: true // 역채점 문항
+            },
+            {
+                id: 9,
+                title: "9. 지난 한 달 동안, 당신이 통제할 수 없는 일 때문에 화가 난 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            },
+            {
+                id: 10,
+                title: "10. 지난 한 달 동안, 어려운 일들이 너무 많이 쌓여서 극복할 수 없다고 느낀 적이 얼마나 자주 있었습니까?",
+                isReverse: false
+            }
+        ];
+
+        // Standard 5-point Frequency Options (0 ~ 4)
+        const standardOptions = [
+            { text: "전혀 없다", value: 0 },
+            { text: "거의 없다", value: 1 },
+            { text: "때때로 있다", value: 2 },
+            { text: "자주 있다", value: 3 },
+            { text: "매우 자주 있다", value: 4 }
+        ];
+
+        // State Variables
+        let currentQuestionIndex = 0;
+        let userRawAnswers = new Array(pssQuestions.length).fill(null); // RAW selected option value (0~4)
+        let chartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        function startTest() {
+            document.getElementById('screen-intro').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function resetToHome() {
+            document.getElementById('screen-intro').classList.remove('hidden');
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.add('hidden');
+        }
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            userRawAnswers = new Array(pssQuestions.length).fill(null);
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = pssQuestions[currentQuestionIndex];
+
+            // Progress Bar & Counter
+            document.getElementById('current-q-num').innerText = currentQuestionIndex + 1;
+            const progressPercent = ((currentQuestionIndex + 1) / pssQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Question Title
+            document.getElementById('question-title').innerText = q.title;
+
+            // Options List
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            standardOptions.forEach((opt) => {
+                const isSelected = userRawAnswers[currentQuestionIndex] === opt.value;
+                const optionBtn = document.createElement('button');
+                optionBtn.type = 'button';
+                optionBtn.className = `w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between ${
+                    isSelected 
+                        ? 'border-sky-600 bg-sky-50/80 text-sky-950 ring-2 ring-sky-600/20 font-medium shadow-sm' 
+                        : 'border-slate-200 hover:border-sky-300 hover:bg-slate-50 text-slate-700'
+                }`;
+                optionBtn.onclick = () => selectOption(opt.value);
+
+                optionBtn.innerHTML = `
+                    <span class="text-sm md:text-base">${opt.text}</span>
+                    <div class="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        isSelected ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-300'
+                    }">
+                        ${isSelected ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
+                    </div>
+                `;
+
+                optionsContainer.appendChild(optionBtn);
+            });
+
+            lucide.createIcons();
+
+            // Button States
+            document.getElementById('btn-prev').disabled = currentQuestionIndex === 0;
+            const nextBtn = document.getElementById('btn-next');
+            nextBtn.disabled = userRawAnswers[currentQuestionIndex] === null;
+
+            if (currentQuestionIndex === pssQuestions.length - 1) {
+                nextBtn.querySelector('span').innerText = '결과 보기';
+            } else {
+                nextBtn.querySelector('span').innerText = '다음';
+            }
+        }
+
+        function selectOption(val) {
+            userRawAnswers[currentQuestionIndex] = val;
+            renderQuestion();
+
+            // Auto-next delay for better UX
+            setTimeout(() => {
+                if (currentQuestionIndex < pssQuestions.length - 1) {
+                    nextQuestion();
+                }
+            }, 200);
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            if (userRawAnswers[currentQuestionIndex] === null) return;
+
+            if (currentQuestionIndex < pssQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // Calculation with reverse scoring (Items 4, 5, 7, 8)
+        function calculateTotalScore() {
+            return userRawAnswers.reduce((total, val, idx) => {
+                const q = pssQuestions[idx];
+                if (q.isReverse) {
+                    // Reverse scoring formula: 4 - value (0->4, 1->3, 2->2, 3->1, 4->0)
+                    return total + (4 - val);
+                }
+                return total + val;
+            }, 0);
+        }
+
+        function showResults() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const totalScore = calculateTotalScore();
+
+            // Date Format
+            const now = new Date();
+            document.getElementById('result-date').innerText = `검사 완료일: ${now.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+
+            document.getElementById('score-text').innerText = totalScore;
+
+            // Reset Level Highlight Cards
+            ['range-low', 'range-mod', 'range-high'].forEach(id => {
+                document.getElementById(id).className = "p-3.5 rounded-xl border text-center space-y-1 border-slate-200 bg-white";
+            });
+
+            let levelTitle = '';
+            let levelDesc = '';
+            let adviceContent = '';
+            let chartColor = '#0284c7'; // sky-600
+            const highAlertEl = document.getElementById('high-stress-alert');
+
+            if (totalScore <= 12) {
+                // Low Stress
+                highAlertEl.classList.add('hidden');
+                levelTitle = "낮은 스트레스 (Low Stress)";
+                levelDesc = "현재 적절한 수준에서 스트레스를 관리하고 있으며, 마음의 균형을 잘 유지하고 계십니다.";
+                adviceContent = `
+                    <p class="mb-2">• <strong>현재 상태 유지:</strong> 지금처럼 규칙적인 생활 습관과 수면 패턴을 꾸준히 이어가세요.</p>
+                    <p class="mb-2">• <strong>예방적 이완:</strong> 산책이나 가벼운 운동 등 적절한 신체 활동을 지속하면 향후 스트레스 저항력이 높아집니다.</p>
+                `;
+                chartColor = '#10b981'; // emerald-500
+                document.getElementById('range-low').className = "p-3.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-center space-y-1 font-bold";
+            } else if (totalScore <= 26) {
+                // Moderate Stress
+                highAlertEl.classList.add('hidden');
+                levelTitle = "중간 정도 스트레스 (Moderate)";
+                levelDesc = "일상적인 수준의 스트레스를 경험하고 있으며, 적절한 휴식과 자기 관리가 필요한 상태입니다.";
+                adviceContent = `
+                    <p class="mb-2">• <strong>우선순위 정리:</strong> 나를 피로하게 만드는 스트레스 요인을 파악하고, 당장 제어하기 힘든 일은 조금 내려놓아 보세요.</p>
+                    <p class="mb-2">• <strong>마음 이완 기법:</strong> 복식 호흡, 명상, 좋아하는 음악 감상 등 나만의 이완 시간을 하루 15분 이상 확보해 보세요.</p>
+                    <p>• <strong>대화 나누기:</strong> 가까운 친구나 가족에게 마음을 털어놓는 것만으로도 감정적 부담을 줄일 수 있습니다.</p>
+                `;
+                chartColor = '#f59e0b'; // amber-500
+                document.getElementById('range-mod').className = "p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50 text-center space-y-1 font-bold";
+            } else {
+                // High Stress (27 ~ 40)
+                highAlertEl.classList.remove('hidden');
+                levelTitle = "높은 스트레스 (High Stress)";
+                levelDesc = "일상생활의 제어력을 잃었다고 느끼거나 과도한 과부하를 겪고 있는 상태입니다. 전문적인 도움이 도움이 될 수 있습니다.";
+                adviceContent = `
+                    <p class="mb-2">• <strong>충분한 휴식 보장:</strong> 몸과 마음의 피로도가 높은 상태입니다. 업무나 공부 외에 완전한 휴식 시간을 우선적으로 확보하세요.</p>
+                    <p class="mb-2">• <strong>전문 상담 고려:</strong> 장기간 고도의 스트레스에 노출되면 두통, 불면, 우울감 등 신체·정신적 증상이 나타날 수 있으므로 전문 상담사나 의사의 도움을 권장합니다.</p>
+                    <p>• <strong>도움 요청하기:</strong> 혼자 대처하려 하지 말고, 주변에 도움을 요청하여 부담을 분산해 보세요.</p>
+                `;
+                chartColor = '#ef4444'; // red-500
+                document.getElementById('range-high').className = "p-3.5 rounded-xl border-2 border-red-500 bg-red-50 text-center space-y-1 font-bold";
+            }
+
+            document.getElementById('severity-title').innerText = levelTitle;
+            document.getElementById('severity-title').style.color = chartColor;
+            document.getElementById('severity-desc').innerText = levelDesc;
+            document.getElementById('advice-box').innerHTML = adviceContent;
+
+            renderGaugeChart(totalScore, chartColor);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderGaugeChart(score, color) {
+            const ctx = document.getElementById('gaugeChart').getContext('2d');
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            const remaining = 40 - score;
+
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['현재 점수', '남은 점수'],
+                    datasets: [{
+                        data: [score, remaining],
+                        backgroundColor: [color, '#e2e8f0'],
+                        borderWidth: 0,
+                        hoverOffset: 2
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+            }, 3000);
+        }
+
+        function copyShareLink() {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+
+            showToast('검사 링크가 클립보드에 복사되었습니다.');
+        }
+    </script>
+</body>
+</html>
